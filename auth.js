@@ -23,24 +23,44 @@ const showMessage = (text) => {
   messageEl.textContent = text;
 };
 
+// usernanme validate
+
+function validateUsername(username) {
+  // Regex: 3-20 characters, alphanumeric and underscore
+  const regex = /^[a-zA-Z0-9_]{3,20}$/;
+  return regex.test(username);
+}
+
+
 // Đăng ký
 window.register = async () => {
+  const username = getElement("registerUsername").value.trim();
   const email = getElement("registerEmail").value.trim();
   const password = getElement("registerPassword").value;
+  const repeat = getElement("registerRepeat").value;
 
-  if (!email || !password) {
-    showMessage("Vui lòng nhập đầy đủ!");
+  if (!email || !password || !username) {
+    showMessage("Please fill in all the boxes");
     return;
   }
 
-  if (password.length < 6) {
-    showMessage("Mật khẩu phải có ít nhất 6 ký tự!");
+  if (password.length < 8) {
+    showMessage("Password must have atleast 8 charactaers");
+    return;
+  }
+  if (username.length < 3 || username.length > 20 || !validateUsername(username)){
+    showMessage("Invalid Username")
+    return;
+  }
+
+  if (password != repeat){
+    showMessage("Password not the same")
     return;
   }
 
   try {
     await createUserWithEmailAndPassword(auth, email, password);
-    window.location.href = "ịndex.html";
+    window.location.href = "Customer Stuff/index.html";
   } catch ({ message }) {
     showMessage(`Lỗi: ${message}`);
   }
@@ -58,7 +78,7 @@ window.login = async () => {
 
   try {
     await signInWithEmailAndPassword(auth, email, password);
-    window.location.href = "ịndex.html";
+    window.location.href = "index.html";
   } catch (error) {
     showMessage("Email hoặc mật khẩu không đúng!");
   }
@@ -78,7 +98,7 @@ window.showLogin = () => {
 // Kiểm tra nếu đã đăng nhập thì chuyển sang index.html
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    window.location.href = "ịndex.html";
+    window.location.href = "index.html";
   }
 });
 
