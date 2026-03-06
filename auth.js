@@ -4,8 +4,8 @@ import {
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
   onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+} from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
 import { firebaseConfig } from "./config.js";
 
 // Khởi tạo Firebase
