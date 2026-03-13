@@ -5,5 +5,5 @@ export const firebaseConfig = {
   storageBucket: "scameastervn.firebasestorage.app",
   messagingSenderId: "454961718651",
   appId: "1:454961718651:web:3d54da75cfd03f657ec9de",
-  measurementId: "G-PLJ7JMH4Y0"
+  measurementId: "G-EW8TXRW912"
 };
