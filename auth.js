@@ -3,7 +3,9 @@ import {
   getAuth, 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
-  onAuthStateChanged
+  onAuthStateChanged,
+  sendEmailVerification,
+  signOut
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
 import { firebaseConfig } from "./config.js";
@@ -59,15 +61,18 @@ window.register = async () => {
   }
 
   try {
-    await createUserWithEmailAndPassword(auth, email, password);
-    window.location.href = "Customer Stuff/index.html";
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    await sendEmailVerification(userCredential.user);
+    showMessage("Registration successful. Please verify your email before signing in.");
+    showLogin();
   } catch ({ message }) {
     showMessage(`Lỗi: ${message}`);
   }
 };
 
 // Đăng nhập
-window.login = async () => {
+window.login = async (event) => {
+  if (event) event.preventDefault();
   const email = getElement("loginEmail").value.trim();
   const password = getElement("loginPassword").value;
 
@@ -77,7 +82,11 @@ window.login = async () => {
   }
 
   try {
-    await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    if (!userCredential.user.emailVerified) {
+      showMessage("Please verify your email before logging in.");
+      return;
+    }
     window.location.href = "index.html";
   } catch (error) {
     showMessage("Email hoặc mật khẩu không đúng!");
@@ -97,7 +106,26 @@ window.showLogin = () => {
 
 // Kiểm tra nếu đã đăng nhập thì chuyển sang index.html
 onAuthStateChanged(auth, (user) => {
-  if (user) {
+  const accountEmail = getElement("accountEmail");
+  const accountPanel = getElement("accountPanel");
+  const signOutBtn = getElement("signOutBtn");
+
+  if (user && accountEmail) {
+    accountEmail.textContent = user.email || "Signed in";
+  }
+
+  if (accountPanel) {
+    accountPanel.style.display = user ? "flex" : "none";
+  }
+
+  if (signOutBtn) {
+    signOutBtn.onclick = async () => {
+      await signOut(auth);
+      window.location.href = "login.html";
+    };
+  }
+
+  if (user && window.location.pathname.endsWith("login.html")) {
     window.location.href = "index.html";
   }
 });

@@ -39,7 +39,12 @@
         <div class="flex items-center space-x-4">
             <a href="#" class="hover:underline">Track order</a>
             <span class="text-gray-400">|</span>
-            <a href="login.html" class="hover:underline">Login / Sign up</a>
+            <a href="login.html" id="authLink" class="hover:underline">Login / Sign up</a>
+            <div id="accountPanel" class="hidden items-center space-x-2">
+                <span class="text-gray-300">|</span>
+                <span id="accountEmail" class="text-yellow-300 text-xs font-semibold"></span>
+                <button id="signOutBtn" class="text-white hover:underline text-xs">Sign out</button>
+            </div>
         </div>
     </div>
 </div>
@@ -289,6 +294,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
     import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCUY9wHtUsHr8gemjLo-gR7uFF93AErr2M",
@@ -302,6 +308,7 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth(app);
     const productsRef = collection(db, "products");
 
     function getCategoryEmoji(category) {
@@ -372,6 +379,30 @@
 
         grid.innerHTML = products.map(p => renderProductCard(p)).join('');
     }
+
+    const authLink = document.getElementById("authLink");
+    const accountPanel = document.getElementById("accountPanel");
+    const accountEmail = document.getElementById("accountEmail");
+    const signOutBtn = document.getElementById("signOutBtn");
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            authLink.classList.add("hidden");
+            accountPanel.classList.remove("hidden");
+            accountPanel.classList.add("flex");
+            accountEmail.textContent = user.email || "My account";
+        } else {
+            authLink.classList.remove("hidden");
+            accountPanel.classList.add("hidden");
+            accountPanel.classList.remove("flex");
+            accountEmail.textContent = "";
+        }
+    });
+
+    signOutBtn?.addEventListener("click", async () => {
+        await signOut(auth);
+        window.location.href = "login.html";
+    });
 
     const q = query(productsRef, orderBy("createdAt", "desc"));
     onSnapshot(q, (snapshot) => {
