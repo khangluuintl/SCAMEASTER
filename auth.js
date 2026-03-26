@@ -109,6 +109,7 @@ onAuthStateChanged(auth, (user) => {
   const accountEmail = getElement("accountEmail");
   const accountPanel = getElement("accountPanel");
   const signOutBtn = getElement("signOutBtn");
+  const currentPage = window.location.pathname.split("/").pop();
 
   if (user && accountEmail) {
     accountEmail.textContent = user.email || "Signed in";
@@ -125,7 +126,8 @@ onAuthStateChanged(auth, (user) => {
     };
   }
 
-  if (user && window.location.pathname.endsWith("login.html")) {
+  // Redirect authenticated users away from auth pages
+  if (user && (currentPage === "login.html" || currentPage === "signup.html")) {
     window.location.href = "index.html";
   }
 });
