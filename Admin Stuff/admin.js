@@ -10,7 +10,8 @@ import {
     orderBy,
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
-import { db } from "../firebase.js";
+import { onAuthStateChanged, getIdTokenResult } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+import { auth, db } from "../firebase.js";
 const productsRef = collection(db, "products");
 
 // Local state
@@ -340,6 +341,36 @@ document.addEventListener('DOMContentLoaded', () => {
     renderRecentActivity();
     updateDashboardStats();
 
-    // Start real-time listener for products
-    listenToProducts();
+    // Gate admin access by Firebase Auth custom claim
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            window.location.href = "../login.html";
+            return;
+        }
+
+        try {
+            // First check cached token claims to reduce unnecessary force refreshes.
+            let tokenResult = await getIdTokenResult(user);
+            let isAdmin = !!tokenResult?.claims?.admin;
+
+            // If claim is missing, force refresh once to pick up recent changes.
+            if (!isAdmin) {
+                tokenResult = await getIdTokenResult(user, true);
+                isAdmin = !!tokenResult?.claims?.admin;
+            }
+
+            if (!isAdmin) {
+                alert("Access denied. Admins only.");
+                window.location.href = "../index.html";
+                return;
+            }
+
+            // Start real-time listener for products only for admins
+            listenToProducts();
+        } catch (error) {
+            console.error("Error checking admin claim:", error);
+            alert("Unable to verify admin access right now. Please try again.");
+            window.location.href = "../index.html";
+        }
+    });
 });

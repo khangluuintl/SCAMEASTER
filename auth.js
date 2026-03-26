@@ -18,8 +18,23 @@ const registerForm = getElement("registerForm");
 // Hiển thị thông báo
 const showMessage = (text) => {
   const messageEl = getElement("message");
-  messageEl.textContent = text;
+  if (messageEl) messageEl.textContent = text;
 };
+
+const AUTH_ERROR_MESSAGES = {
+  "auth/email-already-in-use": "This email is already in use.",
+  "auth/invalid-email": "Invalid email address.",
+  "auth/weak-password": "Password is too weak.",
+  "auth/user-not-found": "No account found with this email.",
+  "auth/wrong-password": "Incorrect password.",
+  "auth/invalid-credential": "Incorrect email or password.",
+  "auth/too-many-requests": "Too many attempts. Please try again later.",
+  "auth/network-request-failed": "Network error. Please check your connection."
+};
+
+function getAuthErrorMessage(error, fallback = "Authentication failed. Please try again.") {
+  return AUTH_ERROR_MESSAGES[error?.code] || error?.message || fallback;
+}
 
 // usernanme validate
 
@@ -43,16 +58,17 @@ window.register = async () => {
   }
 
   if (password.length < 8) {
-    showMessage("Password must have atleast 8 charactaers");
-    return;
-  }
-  if (username.length < 3 || username.length > 20 || !validateUsername(username)){
-    showMessage("Invalid Username")
+    showMessage("Password must be at least 8 characters.");
     return;
   }
 
-  if (password != repeat){
-    showMessage("Password not the same")
+  if (username.length < 3 || username.length > 20 || !validateUsername(username)) {
+    showMessage("Invalid username. Use 3-20 letters, numbers, or underscores.");
+    return;
+  }
+
+  if (password !== repeat) {
+    showMessage("Passwords do not match.");
     return;
   }
 
@@ -68,8 +84,8 @@ window.register = async () => {
     await sendEmailVerification(userCredential.user);
     showMessage("Registration successful. Please verify your email before signing in.");
     showLogin();
-  } catch ({ message }) {
-    showMessage(`Lỗi: ${message}`);
+  } catch (error) {
+    showMessage(getAuthErrorMessage(error, "Registration failed. Please try again."));
   }
 };
 
@@ -80,7 +96,7 @@ window.login = async (event) => {
   const password = getElement("loginPassword").value;
 
   if (!email || !password) {
-    showMessage("Vui lòng nhập đầy đủ!");
+    showMessage("Please enter both email and password.");
     return;
   }
 
@@ -92,7 +108,7 @@ window.login = async (event) => {
     }
     window.location.href = "index.html";
   } catch (error) {
-    showMessage("Email hoặc mật khẩu không đúng!");
+    showMessage(getAuthErrorMessage(error, "Incorrect email or password."));
   }
 };
 
