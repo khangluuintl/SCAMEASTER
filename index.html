@@ -292,23 +292,9 @@
     </div>
 </footer>
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-    import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyCUY9wHtUsHr8gemjLo-gR7uFF93AErr2M",
-        authDomain: "scameastervn.firebaseapp.com",
-        projectId: "scameastervn",
-        storageBucket: "scameastervn.firebasestorage.app",
-        messagingSenderId: "454961718651",
-        appId: "1:454961718651:web:b7b3b1a958290d7c7ec9de",
-        measurementId: "G-EW8TXRW912"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
+    import { collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+    import { auth, db } from "./firebase.js";
     const productsRef = collection(db, "products");
 
     function getCategoryEmoji(category) {

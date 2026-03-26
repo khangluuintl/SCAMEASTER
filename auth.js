@@ -1,18 +1,14 @@
 // Import Firebase
 import { 
-  getAuth, 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
   onAuthStateChanged,
   sendEmailVerification,
-  signOut
+  signOut,
+  sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-import { firebaseConfig } from "./config.js";
-
-// Khởi tạo Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+import { doc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+import { auth, db } from "./firebase.js";
 
 // Lấy DOM elements
 const getElement = (id) => document.getElementById(id);
@@ -62,6 +58,13 @@ window.register = async () => {
 
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+    await setDoc(doc(db, "users", userCredential.user.uid), {
+      username,
+      email,
+      createdAt: serverTimestamp()
+    });
+
     await sendEmailVerification(userCredential.user);
     showMessage("Registration successful. Please verify your email before signing in.");
     showLogin();
@@ -129,6 +132,46 @@ onAuthStateChanged(auth, (user) => {
   // Redirect authenticated users away from auth pages
   if (user && (currentPage === "login.html" || currentPage === "signup.html")) {
     window.location.href = "index.html";
+  }
+});
+
+// Reset password
+window.resetPassword = async (event) => {
+  if (event) event.preventDefault();
+
+  const email = getElement("resetEmail")?.value.trim();
+  const resetMessage = getElement("resetMessage");
+
+  if (!email) {
+    if (resetMessage) {
+      resetMessage.textContent = "Please enter your email address.";
+      resetMessage.className = "text-sm mt-3 text-center text-red-500";
+      resetMessage.classList.remove("hidden");
+    }
+    return;
+  }
+
+  try {
+    await sendPasswordResetEmail(auth, email);
+
+    if (resetMessage) {
+      resetMessage.textContent = "Password reset email sent. Please check your inbox.";
+      resetMessage.className = "text-sm mt-3 text-center text-green-600";
+      resetMessage.classList.remove("hidden");
+    }
+  } catch (error) {
+    if (resetMessage) {
+      resetMessage.textContent = error.message || "Unable to send reset email.";
+      resetMessage.className = "text-sm mt-3 text-center text-red-500";
+      resetMessage.classList.remove("hidden");
+    }
+  }
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  const resetForm = getElement("resetForm");
+  if (resetForm) {
+    resetForm.addEventListener("submit", window.resetPassword);
   }
 });
 

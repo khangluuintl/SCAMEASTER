@@ -1,10 +1,7 @@
 // Firebase imports
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
 import { 
-    getFirestore, 
     collection, 
     addDoc, 
-    getDocs, 
     doc, 
     updateDoc, 
     deleteDoc, 
@@ -13,21 +10,7 @@ import {
     orderBy,
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
-
-// Firebase config
-const firebaseConfig = {
-    apiKey: "AIzaSyCUY9wHtUsHr8gemjLo-gR7uFF93AErr2M",
-    authDomain: "scameastervn.firebaseapp.com",
-    projectId: "scameastervn",
-    storageBucket: "scameastervn.firebasestorage.app",
-    messagingSenderId: "454961718651",
-    appId: "1:454961718651:web:b7b3b1a958290d7c7ec9de",
-    measurementId: "G-EW8TXRW912"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+import { db } from "../firebase.js";
 const productsRef = collection(db, "products");
 
 // Local state
