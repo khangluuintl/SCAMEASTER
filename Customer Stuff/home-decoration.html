@@ -63,14 +63,15 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                     <span class="text-xs mt-0.5 font-medium">Hej!</span>
                 </a>
-                <a href="#" class="flex flex-col items-center px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-50">
+                <a href="#" onclick="_openWishlist();return false;" class="flex flex-col items-center px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-50 relative">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                     <span class="text-xs mt-0.5 font-medium">Wishlist</span>
+                    <span class="wish-badge absolute top-1 right-1 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 items-center justify-center" style="display:none">0</span>
                 </a>
-                <a href="#" class="flex flex-col items-center px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-50 relative">
+                <a href="#" onclick="_openCart();return false;" class="flex flex-col items-center px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-50 relative">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
                     <span class="text-xs mt-0.5 font-medium">Cart</span>
-                    <span class="absolute top-1 right-1 bg-blue-600 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center">0</span>
+                    <span class="cart-badge absolute top-1 right-1 bg-blue-600 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center" style="display:none">0</span>
                 </a>
             </div>
         </div>
@@ -199,6 +200,8 @@
     import { collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
     import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
     import { auth, db } from "../firebase.js";
+    import { initShop } from "./shop.js";
+    initShop();
 
     const CATEGORY = "Home Decoration";
     let allProducts = [];
@@ -212,8 +215,12 @@
         const btnClass = p.stock <= 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-900 text-white hover:bg-gray-700';
         const btnDisabled = p.stock <= 0 ? 'disabled' : '';
         const btnText = p.stock <= 0 ? 'Out of stock' : 'Add to cart';
+        const escName = p.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        const escImg = (p.image || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        const escCat = p.category.replace(/'/g, "\\'");
+        const cartOnclick = p.stock <= 0 ? '' : 'onclick="addToCart(\'' + p.id + '\',\'' + escName + '\',' + p.price + ',\'' + escImg + '\',\'' + escCat + '\')"';
         const desc = p.description ? '<p class="text-xs text-gray-400 mt-1 line-clamp-1">' + p.description + '</p>' : '';
-        return '<div class="prod-card bg-white rounded-xl overflow-hidden shadow-sm group cursor-pointer"><div class="relative h-56 bg-gradient-to-br from-rose-100 to-pink-50 flex items-center justify-center overflow-hidden">' + imgTag + '<div class="' + fallbackClass + ' items-center justify-center w-full h-full text-6xl">&#128444;&#65039;</div>' + badge + '<button class="absolute top-3 right-3 bg-white rounded-full p-2 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"><svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg></button></div><div class="p-4"><p class="text-xs text-gray-500 uppercase tracking-wide">' + p.category + '</p><p class="font-medium text-sm text-gray-800 mt-1">' + p.name + '</p>' + desc + '<div class="mt-3 flex items-baseline space-x-1"><span class="text-xl font-black">$' + pp[0] + '</span><span class="text-xs text-gray-500">.' + pp[1] + '</span></div><button class="mt-3 w-full py-2 rounded-full text-xs font-bold transition-colors ' + btnClass + '" ' + btnDisabled + '>' + btnText + '</button></div></div>';
+        return '<div class="prod-card bg-white rounded-xl overflow-hidden shadow-sm group cursor-pointer"><div class="relative h-56 bg-gradient-to-br from-rose-100 to-pink-50 flex items-center justify-center overflow-hidden">' + imgTag + '<div class="' + fallbackClass + ' items-center justify-center w-full h-full text-6xl">&#128444;&#65039;</div>' + badge + '<button data-wish-id="' + p.id + '" onclick="toggleWishlist(\'' + p.id + '\',\'' + escName + '\',' + p.price + ',\'' + escImg + '\',\'' + escCat + '\')" class="absolute top-3 right-3 bg-white rounded-full p-2 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"><svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg></button></div><div class="p-4"><p class="text-xs text-gray-500 uppercase tracking-wide">' + p.category + '</p><p class="font-medium text-sm text-gray-800 mt-1">' + p.name + '</p>' + desc + '<div class="mt-3 flex items-baseline space-x-1"><span class="text-xl font-black">$' + pp[0] + '</span><span class="text-xs text-gray-500">.' + pp[1] + '</span></div><button ' + cartOnclick + ' class="mt-3 w-full py-2 rounded-full text-xs font-bold transition-colors ' + btnClass + '" ' + btnDisabled + '>' + btnText + '</button></div></div>';
     }
 
     function renderProducts(list) {
@@ -227,6 +234,7 @@
         }
         grid.innerHTML = list.map(p => cardHTML(p)).join('');
         if (badge) badge.textContent = list.length + ' product' + (list.length !== 1 ? 's' : '');
+        document.dispatchEvent(new Event('productsRendered'));
     }
 
     window.applyFilters = function() {

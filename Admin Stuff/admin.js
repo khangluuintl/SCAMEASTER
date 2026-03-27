@@ -13,15 +13,18 @@ import {
 import { onAuthStateChanged, getIdTokenResult } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
 import { auth, db } from "../firebase.js";
 const productsRef = collection(db, "products");
+const usersRef = collection(db, "users");
 
 // Local state
 let products = [];
+let users = [];
 let recentActivities = [];
 
 const pageTitles = {
     'dashboard': 'Dashboard',
     'add-products': 'Add Products',
     'manage-products': 'Manage Products',
+    'manage-accounts': 'Manage Accounts',
 };
 
 // ==================== NAVIGATION ====================
@@ -315,7 +318,7 @@ window.deleteProduct = async function(id) {
     }
 };
 
-// ==================== REAL-TIME LISTENER ====================
+// ==================== REAL-TIME LISTENER (PRODUCTS) ====================
 
 function listenToProducts() {
     const q = query(productsRef, orderBy("createdAt", "desc"));
@@ -334,6 +337,148 @@ function listenToProducts() {
         if (countEl) countEl.textContent = `Error loading products: ${error.message}`;
     });
 }
+
+// ==================== MANAGE ACCOUNTS ====================
+
+function listenToUsers() {
+    const q = query(usersRef, orderBy("createdAt", "desc"));
+
+    onSnapshot(q, (snapshot) => {
+        users = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderUsers(users);
+        updateAccountStats();
+    }, (error) => {
+        console.error("Error listening to users:", error);
+        const tbody = document.getElementById('users-tbody');
+        if (tbody) tbody.innerHTML = `
+            <tr><td colspan="5" class="px-6 py-10 text-center text-red-500 text-sm font-medium">
+                Error loading accounts: ${error.message}
+            </td></tr>`;
+    });
+}
+
+function updateAccountStats() {
+    const totalEl   = document.getElementById('stat-total-users');
+    const adminEl   = document.getElementById('stat-total-admins');
+    const regularEl = document.getElementById('stat-regular-users');
+    if (totalEl)   totalEl.textContent   = users.length;
+    if (adminEl)   adminEl.textContent   = users.filter(u => u.isAdmin).length;
+    if (regularEl) regularEl.textContent = users.filter(u => !u.isAdmin).length;
+}
+
+function getRoleBadge(isAdmin) {
+    return isAdmin
+        ? `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">Admin</span>`
+        : `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">User</span>`;
+}
+
+function formatDate(ts) {
+    if (!ts) return '—';
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function getInitials(email) {
+    if (!email) return '?';
+    return email.charAt(0).toUpperCase();
+}
+
+function renderUsers(list) {
+    const tbody    = document.getElementById('users-tbody');
+    const countEl  = document.getElementById('users-count');
+    if (!tbody) return;
+
+    if (list.length === 0) {
+        const isSearching = document.getElementById('user-search')?.value.trim().length > 0;
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="px-6 py-16 text-center">
+                    <div class="flex flex-col items-center space-y-2">
+                        <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <p class="text-gray-500 font-medium">${isSearching ? 'No accounts match your search.' : 'No registered accounts yet.'}</p>
+                        ${!isSearching ? '<p class="text-gray-400 text-sm">Accounts appear here once users sign up.</p>' : ''}
+                    </div>
+                </td>
+            </tr>`;
+        if (countEl) countEl.textContent = isSearching ? 'No accounts found.' : '0 accounts';
+        return;
+    }
+
+    tbody.innerHTML = list.map(u => `
+        <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
+                         style="background-color: var(--ib);">${getInitials(u.email)}</div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-900">${u.email || '—'}</p>
+                        ${u.displayName ? `<p class="text-xs text-gray-400">${u.displayName}</p>` : ''}
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-xs text-gray-400 font-mono" title="${u.id}">${u.id.slice(0, 12)}…</span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">${getRoleBadge(u.isAdmin)}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatDate(u.createdAt)}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-3">
+                ${u.isAdmin
+                    ? `<button onclick="toggleAdminRole('${u.id}', true)" class="text-yellow-600 hover:text-yellow-900 transition-colors">Remove Admin</button>`
+                    : `<button onclick="toggleAdminRole('${u.id}', false)" class="text-blue-600 hover:text-blue-900 transition-colors">Make Admin</button>`
+                }
+                <button onclick="deleteUserRecord('${u.id}', '${(u.email || '').replace(/'/g, "\\'")}')" class="text-red-600 hover:text-red-900 transition-colors">Delete</button>
+            </td>
+        </tr>
+    `).join('');
+
+    if (countEl) countEl.textContent = `Showing ${list.length} of ${users.length} account${users.length !== 1 ? 's' : ''}`;
+}
+
+window.filterUsers = function(query) {
+    const q = query.trim().toLowerCase();
+    const filtered = q
+        ? users.filter(u =>
+            (u.email || '').toLowerCase().includes(q) ||
+            (u.displayName || '').toLowerCase().includes(q) ||
+            (u.isAdmin ? 'admin' : 'user').includes(q)
+        )
+        : users;
+    renderUsers(filtered);
+};
+
+window.toggleAdminRole = async function(uid, currentIsAdmin) {
+    const user = users.find(u => u.id === uid);
+    if (!user) return;
+
+    const action = currentIsAdmin ? 'remove admin role from' : 'grant admin role to';
+    if (!confirm(`Are you sure you want to ${action} "${user.email}"?`)) return;
+
+    try {
+        const userDocRef = doc(db, "users", uid);
+        await updateDoc(userDocRef, { isAdmin: !currentIsAdmin });
+        addActivity(
+            `${currentIsAdmin ? 'Removed admin from' : 'Granted admin to'}: ${user.email}`,
+            currentIsAdmin ? '🔓' : '🛡️',
+            currentIsAdmin ? 'yellow' : 'blue'
+        );
+    } catch (error) {
+        alert(`Error updating role: ${error.message}`);
+    }
+};
+
+window.deleteUserRecord = async function(uid, email) {
+    if (!confirm(`Delete account record for "${email}"?\n\nThis removes the Firestore record only. The Firebase Auth account remains active.`)) return;
+
+    try {
+        const userDocRef = doc(db, "users", uid);
+        await deleteDoc(userDocRef);
+        addActivity(`Deleted account record: ${email}`, '🗑️', 'red');
+    } catch (error) {
+        alert(`Error deleting account record: ${error.message}`);
+    }
+};
 
 // ==================== INIT ====================
 
@@ -370,8 +515,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Start real-time listener for products only for admins
+            // Start real-time listeners for products and users
             listenToProducts();
+            listenToUsers();
         } catch (error) {
             console.error("Error checking admin claim:", error);
             alert("Unable to verify admin access right now. Please try again.");
