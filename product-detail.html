@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Detail - SCAMEASTER</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans', sans-serif; }
+        :root { --ib: #0058A3; --ibd: #004F93; --iy: #FBD914; --ibk: #111111; --igl: #F5F5F5; }
+        .bg-ib { background-color: var(--ib); }
+        .bg-iy { background-color: var(--iy); }
+        .bg-ibk { background-color: var(--ibk); }
+        .bg-igl { background-color: var(--igl); }
+        .c-ib { color: var(--ib); }
+        .star-filled { color: #f59e0b; }
+        .star-empty { color: #d1d5db; }
+    </style>
+</head>
+<body class="bg-white text-gray-900">
+
+<!-- Top utility bar -->
+<div class="bg-white border-b border-gray-100 text-xs py-2">
+    <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
+        <div class="flex items-center space-x-4 text-gray-500">
+            <span class="flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Find your SCAMEASTER store
+            </span>
+        </div>
+        <div class="flex items-center space-x-4 text-gray-500">
+            <a href="login.html" id="authLink" class="hover:text-gray-900 transition-colors font-medium text-gray-700">Login / Sign up</a>
+            <div id="accountPanel" class="hidden items-center space-x-2">
+                <span class="text-gray-300">|</span>
+                <span id="accountEmail" class="text-blue-600 text-xs font-semibold"></span>
+                <button id="signOutBtn" class="text-gray-600 hover:text-gray-900 text-xs transition-colors">Sign out</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Navbar -->
+<nav class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="flex items-center justify-between h-16 gap-6">
+            <a href="index.html" class="flex items-center flex-shrink-0">
+                <div class="border-2 border-gray-900 rounded-lg px-4 py-1 bg-white">
+                    <span class="text-xl font-black text-gray-900 tracking-tight">SCAMEASTER</span>
+                </div>
+            </a>
+            <div class="flex items-center space-x-1">
+                <a href="login.html" class="flex flex-col items-center px-3 py-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    <span class="text-xs mt-0.5 font-medium">Hej!</span>
+                </a>
+                <a href="#" onclick="_openWishlist();return false;" class="flex flex-col items-center px-3 py-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all relative">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                    <span class="text-xs mt-0.5 font-medium">Wishlist</span>
+                    <span class="wish-badge absolute top-1 right-1 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 items-center justify-center" style="display:none">0</span>
+                </a>
+                <a href="#" onclick="_openCart();return false;" class="flex flex-col items-center px-3 py-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all relative">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                    <span class="text-xs mt-0.5 font-medium">Cart</span>
+                    <span class="cart-badge absolute top-1 right-1 bg-blue-600 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none" style="display:none">0</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Breadcrumb -->
+<div class="max-w-7xl mx-auto px-4 py-4">
+    <div class="flex items-center gap-2 text-sm text-gray-500">
+        <a href="index.html" class="hover:text-blue-600 transition-colors">Home</a>
+        <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <span id="breadcrumb-category" class="hover:text-blue-600 transition-colors cursor-pointer"></span>
+        <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <span id="breadcrumb-name" class="text-gray-800 font-medium"></span>
+    </div>
+</div>
+
+<!-- Loading State -->
+<div id="loading-state" class="max-w-7xl mx-auto px-4 py-20 flex flex-col items-center justify-center">
+    <div class="w-10 h-10 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+    <p class="text-gray-500 text-sm">Loading product...</p>
+</div>
+
+<!-- Error State -->
+<div id="error-state" class="hidden max-w-7xl mx-auto px-4 py-20 flex flex-col items-center justify-center">
+    <div class="text-6xl mb-4">⚠️</div>
+    <p class="text-gray-700 font-bold text-lg">Product not found</p>
+    <p class="text-gray-400 text-sm mt-1">This product may have been removed.</p>
+    <a href="index.html" class="mt-6 px-6 py-2.5 bg-gray-900 text-white rounded-full font-bold text-sm hover:bg-gray-700 transition-colors">Back to Home</a>
+</div>
+
+<!-- Product Detail -->
+<div id="product-detail" class="hidden max-w-7xl mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <!-- Product Image -->
+        <div>
+            <div id="product-image-container" class="rounded-2xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center h-96 md:h-[500px]">
+                <span id="product-emoji" class="text-9xl">📦</span>
+            </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="flex flex-col justify-start space-y-5">
+            <div>
+                <p id="product-category" class="text-xs font-bold text-blue-600 uppercase tracking-widest mb-2"></p>
+                <h1 id="product-name" class="text-3xl font-black text-gray-900 leading-tight"></h1>
+            </div>
+
+            <!-- Rating summary -->
+            <div class="flex items-center gap-3">
+                <div id="avg-stars" class="flex gap-0.5"></div>
+                <span id="avg-rating-text" class="text-sm text-gray-500"></span>
+            </div>
+
+            <!-- Price -->
+            <div class="flex items-baseline gap-1">
+                <span id="product-price-int" class="text-4xl font-black text-gray-900"></span>
+                <span id="product-price-dec" class="text-lg text-gray-500 font-normal"></span>
+            </div>
+
+            <!-- Description -->
+            <p id="product-description" class="text-gray-600 text-sm leading-relaxed"></p>
+
+            <!-- Stock -->
+            <div id="stock-badge"></div>
+
+            <!-- Quantity selector -->
+            <div id="qty-section" class="flex items-center gap-4">
+                <span class="text-sm font-bold text-gray-700">Quantity:</span>
+                <div class="flex items-center gap-3 border-2 border-gray-200 rounded-full px-4 py-2">
+                    <button onclick="changeQty(-1)" class="text-gray-600 hover:text-gray-900 font-bold text-lg leading-none w-5 text-center">−</button>
+                    <span id="qty-display" class="text-sm font-bold w-6 text-center">1</span>
+                    <button onclick="changeQty(1)" class="text-gray-600 hover:text-gray-900 font-bold text-lg leading-none w-5 text-center">+</button>
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="flex gap-3 flex-wrap">
+                <button id="add-to-cart-btn" onclick="handleAddToCart()" class="flex-1 py-3.5 bg-gray-900 text-white font-bold rounded-full hover:bg-gray-700 transition-colors text-sm">
+                    Add to cart
+                </button>
+                <button id="wishlist-btn" onclick="handleWishlist()" class="px-5 py-3.5 border-2 border-gray-200 rounded-full hover:bg-gray-50 transition-colors flex items-center gap-2 text-sm font-bold text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                    Save
+                </button>
+            </div>
+
+            <!-- Product meta -->
+            <div class="border-t border-gray-100 pt-4 space-y-2 text-sm text-gray-500">
+                <div class="flex gap-2"><span class="font-semibold text-gray-700 w-24">Category:</span><span id="meta-category"></span></div>
+                <div class="flex gap-2"><span class="font-semibold text-gray-700 w-24">Stock:</span><span id="meta-stock"></span></div>
+                <div id="meta-deal-row" class="hidden flex gap-2"><span class="font-semibold text-gray-700 w-24">Deal:</span><span id="meta-deal"></span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comments Section -->
+    <div class="mt-16 border-t border-gray-100 pt-10">
+        <h2 class="text-2xl font-black text-gray-900 mb-2">Customer Reviews</h2>
+        <p id="comment-count-text" class="text-sm text-gray-400 mb-8">Loading reviews...</p>
+
+        <!-- Add Comment Form (logged-in users only) -->
+        <div id="comment-form-section" class="hidden bg-gray-50 rounded-2xl p-6 mb-8">
+            <h3 class="text-base font-bold text-gray-800 mb-4">Write a Review</h3>
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Rating</label>
+                <div id="star-selector" class="flex gap-1">
+                    <button onclick="setRating(1)" data-star="1" class="star-btn text-3xl text-gray-300 hover:text-yellow-400 transition-colors">★</button>
+                    <button onclick="setRating(2)" data-star="2" class="star-btn text-3xl text-gray-300 hover:text-yellow-400 transition-colors">★</button>
+                    <button onclick="setRating(3)" data-star="3" class="star-btn text-3xl text-gray-300 hover:text-yellow-400 transition-colors">★</button>
+                    <button onclick="setRating(4)" data-star="4" class="star-btn text-3xl text-gray-300 hover:text-yellow-400 transition-colors">★</button>
+                    <button onclick="setRating(5)" data-star="5" class="star-btn text-3xl text-gray-300 hover:text-yellow-400 transition-colors">★</button>
+                </div>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Your Review</label>
+                <textarea id="comment-text" rows="3" placeholder="Share your experience with this product..."
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-300 focus:border-blue-400 text-sm resize-none"></textarea>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="submitComment()" class="px-6 py-2.5 bg-gray-900 text-white font-bold rounded-full text-sm hover:bg-gray-700 transition-colors">
+                    Post Review
+                </button>
+                <p id="comment-msg" class="text-sm text-red-500"></p>
+            </div>
+        </div>
+
+        <!-- Login prompt for guests -->
+        <div id="comment-login-prompt" class="hidden bg-blue-50 border border-blue-100 rounded-2xl p-6 mb-8 flex items-center gap-4">
+            <div class="text-3xl">💬</div>
+            <div>
+                <p class="font-bold text-gray-800 text-sm">Want to leave a review?</p>
+                <p class="text-gray-500 text-xs mt-0.5">Please <a href="login.html" class="text-blue-600 font-bold hover:underline">log in</a> to post a review.</p>
+            </div>
+        </div>
+
+        <!-- Comments List -->
+        <div id="comments-list" class="space-y-4">
+            <div class="flex items-center justify-center py-8">
+                <div class="w-6 h-6 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-ibk text-white mt-16">
+    <div class="max-w-7xl mx-auto px-4 py-12">
+        <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center space-x-2 mb-4 md:mb-0">
+                <div class="bg-iy rounded-lg px-3 py-0.5">
+                    <span class="text-lg font-black c-ib">SCAMEASTER</span>
+                </div>
+                <span class="text-gray-400 text-sm">&copy; 2025 SCAMEASTER. All rights reserved.</span>
+            </div>
+            <div class="flex items-center space-x-4 text-gray-400">
+                <a href="#" class="hover:text-white text-sm">Privacy policy</a>
+                <span>|</span>
+                <a href="#" class="hover:text-white text-sm">Terms</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script type="module">
+    import { doc, getDoc, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+    import { auth, db } from "./firebase.js";
+    import { initShop } from "./Customer Stuff/shop.js";
+    import { initSessionGuard } from "./session.js";
+
+    initShop();
+    initSessionGuard("login.html");
+
+    // ── State ──────────────────────────────────────────────────────────────
+    let currentProduct = null;
+    let currentUser = null;
+    let selectedRating = 0;
+    let qty = 1;
+
+    const CATEGORY_EMOJI = {
+        'Living Room': '🛋️', 'Bedroom': '🛏️', 'Kitchen': '🍳',
+        'Bathroom': '🚿', 'Outdoor': '🌿', 'Storage': '🗄️',
+        'Lighting': '💡', 'Home Decoration': '🖼️',
+        'Home Office': '💼', 'Chairs & Stools': '🪑'
+    };
+
+    // ── Auth ───────────────────────────────────────────────────────────────
+    const authLink = document.getElementById("authLink");
+    const accountPanel = document.getElementById("accountPanel");
+    const accountEmail = document.getElementById("accountEmail");
+    const signOutBtn = document.getElementById("signOutBtn");
+
+    onAuthStateChanged(auth, (user) => {
+        currentUser = user;
+        if (user) {
+            authLink.classList.add("hidden");
+            accountPanel.classList.remove("hidden");
+            accountPanel.classList.add("flex");
+            accountEmail.textContent = user.email || "My account";
+            document.getElementById("comment-form-section").classList.remove("hidden");
+            document.getElementById("comment-login-prompt").classList.add("hidden");
+        } else {
+            authLink.classList.remove("hidden");
+            accountPanel.classList.add("hidden");
+            accountPanel.classList.remove("flex");
+            document.getElementById("comment-form-section").classList.add("hidden");
+            document.getElementById("comment-login-prompt").classList.remove("hidden");
+        }
+    });
+
+    signOutBtn?.addEventListener("click", async () => {
+        await signOut(auth);
+        window.location.href = "login.html";
+    });
+
+    // ── Load Product ───────────────────────────────────────────────────────
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get("id");
+
+    if (!productId) {
+        showError();
+    } else {
+        loadProduct(productId);
+        loadComments(productId);
+    }
+
+    async function loadProduct(id) {
+        try {
+            const docRef = doc(db, "products", id);
+            const docSnap = await getDoc(docRef);
+            if (!docSnap.exists()) { showError(); return; }
+
+            currentProduct = { id: docSnap.id, ...docSnap.data() };
+            renderProduct(currentProduct);
+        } catch (err) {
+            console.error(err);
+            showError();
+        }
+    }
+
+    function showError() {
+        document.getElementById("loading-state").classList.add("hidden");
+        document.getElementById("error-state").classList.remove("hidden");
+    }
+
+    function renderProduct(p) {
+        document.getElementById("loading-state").classList.add("hidden");
+        document.getElementById("product-detail").classList.remove("hidden");
+
+        document.title = `${p.name} - SCAMEASTER`;
+
+        // Breadcrumb
+        const catEl = document.getElementById("breadcrumb-category");
+        catEl.textContent = p.category;
+        catEl.onclick = () => { window.location.href = getCategoryUrl(p.category); };
+        document.getElementById("breadcrumb-name").textContent = p.name;
+
+        // Image
+        const imgContainer = document.getElementById("product-image-container");
+        if (p.image && p.image.trim()) {
+            imgContainer.innerHTML = `<img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover" onerror="this.style.display='none'">`;
+        } else {
+            document.getElementById("product-emoji").textContent = CATEGORY_EMOJI[p.category] || '📦';
+        }
+
+        // Text fields
+        document.getElementById("product-category").textContent = p.category;
+        document.getElementById("product-name").textContent = p.name;
+        const pp = p.price.toFixed(2).split('.');
+        document.getElementById("product-price-int").textContent = `$${pp[0]}`;
+        document.getElementById("product-price-dec").textContent = `.${pp[1]}`;
+        document.getElementById("product-description").textContent = p.description || "No description available.";
+
+        // Meta
+        document.getElementById("meta-category").textContent = p.category;
+        document.getElementById("meta-stock").textContent = p.stock > 0 ? `${p.stock} units available` : "Out of stock";
+        if (p.dealType) {
+            document.getElementById("meta-deal-row").classList.remove("hidden");
+            document.getElementById("meta-deal").textContent = p.dealType;
+        }
+
+        // Stock badge
+        const stockBadge = document.getElementById("stock-badge");
+        if (p.stock <= 0) {
+            stockBadge.innerHTML = `<span class="inline-block bg-red-100 text-red-700 text-xs font-bold px-3 py-1.5 rounded-full">Out of stock</span>`;
+            document.getElementById("add-to-cart-btn").disabled = true;
+            document.getElementById("add-to-cart-btn").className = "flex-1 py-3.5 bg-gray-100 text-gray-400 font-bold rounded-full cursor-not-allowed text-sm";
+            document.getElementById("qty-section").classList.add("hidden");
+        } else if (p.stock <= 10) {
+            stockBadge.innerHTML = `<span class="inline-block bg-yellow-100 text-yellow-700 text-xs font-bold px-3 py-1.5 rounded-full">Only ${p.stock} left in stock!</span>`;
+        } else {
+            stockBadge.innerHTML = `<span class="inline-block bg-green-100 text-green-700 text-xs font-bold px-3 py-1.5 rounded-full">✓ In stock</span>`;
+        }
+    }
+
+    function getCategoryUrl(cat) {
+        const map = {
+            'Living Room': 'Customer Stuff/living-room.html',
+            'Bedroom': 'Customer Stuff/bedroom.html',
+            'Kitchen': 'Customer Stuff/kitchen.html',
+            'Bathroom': 'Customer Stuff/bathroom.html',
+            'Outdoor': 'Customer Stuff/outdoor.html',
+            'Storage': 'Customer Stuff/storage.html',
+            'Lighting': 'Customer Stuff/lighting.html',
+            'Home Decoration': 'Customer Stuff/home-decoration.html',
+        };
+        return map[cat] || 'index.html';
+    }
+
+    // ── Quantity ───────────────────────────────────────────────────────────
+    window.changeQty = function(delta) {
+        if (!currentProduct) return;
+        qty = Math.max(1, Math.min(qty + delta, currentProduct.stock));
+        document.getElementById("qty-display").textContent = qty;
+    };
+
+    // ── Cart / Wishlist ────────────────────────────────────────────────────
+    window.handleAddToCart = function() {
+        if (!currentProduct || currentProduct.stock <= 0) return;
+        for (let i = 0; i < qty; i++) {
+            window.addToCart(currentProduct.id, currentProduct.name, currentProduct.price, currentProduct.image || '', currentProduct.category);
+        }
+    };
+
+    window.handleWishlist = function() {
+        if (!currentProduct) return;
+        window.toggleWishlist(currentProduct.id, currentProduct.name, currentProduct.price, currentProduct.image || '', currentProduct.category);
+    };
+
+    // ── Comments ───────────────────────────────────────────────────────────
+    window.setRating = function(val) {
+        selectedRating = val;
+        document.querySelectorAll('.star-btn').forEach(btn => {
+            const star = parseInt(btn.getAttribute('data-star'));
+            btn.style.color = star <= val ? '#f59e0b' : '#d1d5db';
+        });
+    };
+
+    window.submitComment = async function() {
+        const msgEl = document.getElementById("comment-msg");
+        const text = document.getElementById("comment-text").value.trim();
+
+        if (!currentUser) { msgEl.textContent = "Please log in to post a review."; return; }
+        if (selectedRating === 0) { msgEl.textContent = "Please select a star rating."; return; }
+        if (!text) { msgEl.textContent = "Please write your review."; return; }
+
+        msgEl.textContent = "";
+        try {
+            // Get username from Firestore users collection
+            let username = currentUser.email.split('@')[0];
+            try {
+                const { doc: firestoreDoc, getDoc: firestoreGetDoc } = await import("https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js");
+                const userSnap = await getDoc(doc(db, "users", currentUser.uid));
+                if (userSnap.exists() && userSnap.data().username) {
+                    username = userSnap.data().username;
+                }
+            } catch {}
+
+            await addDoc(collection(db, "comments"), {
+                productId: productId,
+                userId: currentUser.uid,
+                userEmail: currentUser.email,
+                username,
+                text,
+                rating: selectedRating,
+                createdAt: serverTimestamp()
+            });
+
+            document.getElementById("comment-text").value = "";
+            selectedRating = 0;
+            document.querySelectorAll('.star-btn').forEach(btn => { btn.style.color = '#d1d5db'; });
+            msgEl.style.color = '#16a34a';
+            msgEl.textContent = "Review posted successfully!";
+            setTimeout(() => { msgEl.textContent = ""; msgEl.style.color = ''; }, 3000);
+        } catch (err) {
+            msgEl.textContent = "Failed to post review. Please try again.";
+            console.error(err);
+        }
+    };
+
+    function loadComments(pid) {
+        const q = query(
+            collection(db, "comments"),
+            where("productId", "==", pid),
+            orderBy("createdAt", "desc")
+        );
+
+        onSnapshot(q, (snapshot) => {
+            const comments = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+            renderComments(comments);
+            renderAvgRating(comments);
+        }, (err) => {
+            console.error("Error loading comments:", err);
+            document.getElementById("comments-list").innerHTML = `<p class="text-gray-400 text-sm">Unable to load reviews.</p>`;
+        });
+    }
+
+    function renderAvgRating(comments) {
+        const countEl = document.getElementById("comment-count-text");
+        const starsEl = document.getElementById("avg-stars");
+        const ratingTextEl = document.getElementById("avg-rating-text");
+
+        if (comments.length === 0) {
+            countEl.textContent = "No reviews yet. Be the first!";
+            starsEl.innerHTML = [1,2,3,4,5].map(() => `<span class="text-gray-200 text-lg">★</span>`).join('');
+            ratingTextEl.textContent = "";
+            return;
+        }
+
+        const avg = comments.reduce((s, c) => s + (c.rating || 0), 0) / comments.length;
+        countEl.textContent = `${comments.length} review${comments.length !== 1 ? 's' : ''}`;
+        starsEl.innerHTML = [1,2,3,4,5].map(i =>
+            `<span class="text-lg ${i <= Math.round(avg) ? 'text-yellow-400' : 'text-gray-200'}">★</span>`
+        ).join('');
+        ratingTextEl.textContent = `${avg.toFixed(1)} out of 5`;
+    }
+
+    function renderComments(comments) {
+        const list = document.getElementById("comments-list");
+        if (comments.length === 0) {
+            list.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-12 text-center">
+                    <div class="text-5xl mb-3">💬</div>
+                    <p class="text-gray-500 font-medium">No reviews yet</p>
+                    <p class="text-gray-400 text-sm mt-1">Be the first to share your experience!</p>
+                </div>`;
+            return;
+        }
+
+        list.innerHTML = comments.map(c => {
+            const stars = [1,2,3,4,5].map(i =>
+                `<span class="${i <= c.rating ? 'text-yellow-400' : 'text-gray-200'}">★</span>`
+            ).join('');
+            const date = c.createdAt?.toDate
+                ? c.createdAt.toDate().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+                : '';
+            return `
+                <div class="bg-gray-50 rounded-2xl p-5">
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                                ${(c.username || c.userEmail || '?').charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-gray-800">${c.username || c.userEmail || 'Anonymous'}</p>
+                                <div class="flex gap-0.5 text-sm">${stars}</div>
+                            </div>
+                        </div>
+                        <span class="text-xs text-gray-400">${date}</span>
+                    </div>
+                    <p class="text-sm text-gray-600 leading-relaxed mt-2">${c.text}</p>
+                </div>`;
+        }).join('');
+    }
+</script>
+</body>
+</html>

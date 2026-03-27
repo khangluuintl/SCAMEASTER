@@ -8,8 +8,9 @@ import {
   sendPasswordResetEmail,
   getIdTokenResult
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
-import { doc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+import { doc, getDoc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 import { auth, db } from "./firebase.js";
+import { recordLoginTime, clearSessionTime } from "./session.js";
 
 // Lấy DOM elements
 const getElement = (id) => document.getElementById(id);
@@ -79,6 +80,7 @@ window.register = async () => {
     await setDoc(doc(db, "users", userCredential.user.uid), {
       username,
       email,
+      isAdmin: false,
       createdAt: serverTimestamp()
     });
 
@@ -107,6 +109,27 @@ window.login = async (event) => {
       showMessage("Please verify your email before logging in.");
       return;
     }
+    // Record login time for 15-minute session guard
+    recordLoginTime();
+
+    // Ensure Firestore user document exists (creates it for users who registered
+    // before Firestore rules were deployed, so they appear in Manage Accounts)
+    try {
+      const userDocRef = doc(db, "users", userCredential.user.uid);
+      const userSnap = await getDoc(userDocRef);
+      if (!userSnap.exists()) {
+        await setDoc(userDocRef, {
+          username: userCredential.user.email?.split('@')[0] || 'user',
+          email: userCredential.user.email,
+          isAdmin: false,
+          createdAt: serverTimestamp()
+        });
+      }
+    } catch (firestoreErr) {
+      // Non-fatal: log but don't block login
+      console.warn("Could not sync user profile to Firestore:", firestoreErr.message);
+    }
+
     // Redirect admins to the admin panel, regular users to homepage
     const tokenResult = await getIdTokenResult(userCredential.user);
     if (tokenResult?.claims?.admin) {
@@ -147,6 +170,7 @@ onAuthStateChanged(auth, (user) => {
 
   if (signOutBtn) {
     signOutBtn.onclick = async () => {
+      clearSessionTime();
       await signOut(auth);
       window.location.href = "login.html";
     };

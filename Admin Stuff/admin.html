@@ -29,7 +29,7 @@
             <nav class="flex-1 overflow-y-auto py-4">
                 <ul class="space-y-1 px-3">
                     <li>
-                        <a href="#" onclick="return showSection('dashboard')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white/10 transition-all" data-section="dashboard">
+                        <a onclick="return showSection('dashboard')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white/10 transition-all" data-section="dashboard">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                             </svg>
@@ -37,7 +37,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#" onclick="return showSection('add-products')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white/10 transition-all" data-section="add-products">
+                        <a onclick="return showSection('add-products')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white/10 transition-all" data-section="add-products">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                             </svg>
@@ -45,7 +45,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#" onclick="return showSection('manage-products')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white/10 transition-all" data-section="manage-products">
+                        <a onclick="return showSection('manage-products')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white/10 transition-all" data-section="manage-products">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                             </svg>
@@ -53,11 +53,19 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#" onclick="return showSection('manage-accounts')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white/10 transition-all" data-section="manage-accounts">
+                        <a onclick="return showSection('manage-accounts')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white/10 transition-all" data-section="manage-accounts">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                             </svg>
                             <span class="font-medium text-sm">Manage Accounts</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a onclick="return showSection('manage-orders')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white/10 transition-all" data-section="manage-orders">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                            </svg>
+                            <span class="font-medium text-sm">Manage Orders</span>
                         </a>
                     </li>
                 </ul>
@@ -287,6 +295,72 @@
                             <p id="users-count" class="text-sm text-gray-500"></p>
                             <p class="text-xs text-gray-400">⚠️ Role changes update Firestore. Firebase Auth custom claims require a server-side token refresh to take effect.</p>
                         </div>
+                    </div>
+                </section>
+
+                <!-- Manage Orders Section -->
+                <section id="manage-orders" class="content-section hidden">
+                    <!-- Order Stats -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4" style="border-left-color: var(--ib);">
+                            <p class="text-xs text-gray-500 font-medium">Total Orders</p>
+                            <p id="stat-total-orders" class="text-3xl font-black text-gray-900 mt-1">0</p>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-yellow-400">
+                            <p class="text-xs text-gray-500 font-medium">Processing</p>
+                            <p id="stat-orders-processing" class="text-3xl font-black text-gray-900 mt-1">0</p>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-green-500">
+                            <p class="text-xs text-gray-500 font-medium">Paid</p>
+                            <p id="stat-orders-paid" class="text-3xl font-black text-gray-900 mt-1">0</p>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-blue-400">
+                            <p class="text-xs text-gray-500 font-medium">Delivered</p>
+                            <p id="stat-orders-delivered" class="text-3xl font-black text-gray-900 mt-1">0</p>
+                        </div>
+                    </div>
+
+                    <!-- Orders Table -->
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-black text-gray-900">All Orders</h3>
+                            <div class="flex gap-3">
+                                <select id="order-status-filter" onchange="filterOrders()" class="px-4 py-2 border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="">All Statuses</option>
+                                    <option value="Processing">Processing</option>
+                                    <option value="Paid">Paid</option>
+                                    <option value="Delivered">Delivered</option>
+                                </select>
+                                <input id="order-search" type="text" placeholder="Search by name or email..." class="px-4 py-2 border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" oninput="filterOrders()">
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="border-b-2 border-gray-200" style="background-color: var(--igl);">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Order ID</th>
+                                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Customer</th>
+                                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Items</th>
+                                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Total</th>
+                                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Payment</th>
+                                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Date</th>
+                                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="orders-tbody" class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td colspan="8" class="px-6 py-16 text-center">
+                                            <div class="flex flex-col items-center space-y-2">
+                                                <div class="w-8 h-8 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+                                                <p class="text-gray-500 text-sm">Loading orders...</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p id="orders-count" class="text-sm text-gray-500 mt-4"></p>
                     </div>
                 </section>
 

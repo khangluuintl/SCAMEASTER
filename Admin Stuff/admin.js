@@ -14,10 +14,11 @@ import { onAuthStateChanged, getIdTokenResult } from "https://www.gstatic.com/fi
 import { auth, db } from "../firebase.js";
 const productsRef = collection(db, "products");
 const usersRef = collection(db, "users");
+const ordersRef = collection(db, "orders");
 
-// Local state
 let products = [];
 let users = [];
+let orders = [];
 let recentActivities = [];
 
 const pageTitles = {
@@ -25,9 +26,8 @@ const pageTitles = {
     'add-products': 'Add Products',
     'manage-products': 'Manage Products',
     'manage-accounts': 'Manage Accounts',
+    'manage-orders': 'Manage Orders',
 };
-
-// ==================== NAVIGATION ====================
 
 window.showSection = function(sectionId) {
     document.querySelectorAll('.content-section').forEach(section => {
@@ -49,11 +49,9 @@ window.showSection = function(sectionId) {
     return false;
 };
 
-// ==================== HELPERS ====================
-
 function getStockStatus(stock) {
     if (stock <= 0) return 'Out of Stock';
-    if (stock <= 10) return 'Low Stock';
+    if (stock <= 25) return 'Low Stock';
     return 'In Stock';
 }
 
@@ -85,8 +83,6 @@ function addActivity(text, icon, color) {
     if (recentActivities.length > 20) recentActivities.pop();
     renderRecentActivity();
 }
-
-// ==================== DASHBOARD ====================
 
 function renderRecentActivity() {
     const container = document.getElementById('recent-activity');
@@ -480,6 +476,134 @@ window.deleteUserRecord = async function(uid, email) {
     }
 };
 
+// ==================== MANAGE ORDERS ====================
+
+function listenToOrders() {
+    const q = query(ordersRef, orderBy("createdAt", "desc"));
+
+    onSnapshot(q, (snapshot) => {
+        orders = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderOrders(orders);
+        updateOrderStats();
+    }, (error) => {
+        console.error("Error listening to orders:", error);
+        const tbody = document.getElementById('orders-tbody');
+        if (tbody) tbody.innerHTML = `
+            <tr><td colspan="8" class="px-6 py-10 text-center text-red-500 text-sm font-medium">
+                Error loading orders: ${error.message}
+            </td></tr>`;
+    });
+}
+
+function updateOrderStats() {
+    const totalEl      = document.getElementById('stat-total-orders');
+    const processingEl = document.getElementById('stat-orders-processing');
+    const paidEl       = document.getElementById('stat-orders-paid');
+    const deliveredEl  = document.getElementById('stat-orders-delivered');
+    if (totalEl)      totalEl.textContent      = orders.length;
+    if (processingEl) processingEl.textContent = orders.filter(o => o.status === 'Processing').length;
+    if (paidEl)       paidEl.textContent       = orders.filter(o => o.status === 'Paid').length;
+    if (deliveredEl)  deliveredEl.textContent  = orders.filter(o => o.status === 'Delivered').length;
+}
+
+function getOrderStatusBadge(status) {
+    const map = {
+        'Processing': 'bg-yellow-100 text-yellow-800',
+        'Paid':       'bg-green-100 text-green-800',
+        'Delivered':  'bg-blue-100 text-blue-800',
+    };
+    return `<span class="px-2 py-1 text-xs font-semibold rounded-full ${map[status] || 'bg-gray-100 text-gray-800'}">${status || '—'}</span>`;
+}
+
+function renderOrders(list) {
+    const tbody   = document.getElementById('orders-tbody');
+    const countEl = document.getElementById('orders-count');
+    if (!tbody) return;
+
+    if (list.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="px-6 py-16 text-center">
+                    <div class="flex flex-col items-center space-y-2">
+                        <div class="text-5xl">📋</div>
+                        <p class="text-gray-500 font-medium">No orders found.</p>
+                    </div>
+                </td>
+            </tr>`;
+        if (countEl) countEl.textContent = '0 orders';
+        return;
+    }
+
+    tbody.innerHTML = list.map(o => {
+        const itemCount = Array.isArray(o.items) ? o.items.length : 0;
+        const itemSummary = Array.isArray(o.items)
+            ? o.items.slice(0, 2).map(i => `${i.name} ×${i.qty}`).join(', ') + (o.items.length > 2 ? ` +${o.items.length - 2} more` : '')
+            : '—';
+        const date = o.createdAt?.toDate
+            ? o.createdAt.toDate().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+            : '—';
+        const shortId = o.id.slice(0, 8) + '…';
+
+        return `
+        <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-4 py-4 whitespace-nowrap">
+                <span class="text-xs font-mono text-gray-500" title="${o.id}">${shortId}</span>
+            </td>
+            <td class="px-4 py-4">
+                <p class="text-sm font-semibold text-gray-900">${o.name || '—'}</p>
+                <p class="text-xs text-gray-400">${o.userEmail || '—'}</p>
+                <p class="text-xs text-gray-400 truncate max-w-[160px]" title="${o.address || ''}">${o.address || '—'}</p>
+            </td>
+            <td class="px-4 py-4">
+                <p class="text-xs text-gray-600 max-w-[160px]">${itemSummary}</p>
+                <p class="text-xs text-gray-400 mt-0.5">${itemCount} item${itemCount !== 1 ? 's' : ''}</p>
+            </td>
+            <td class="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-900">$${(o.total || 0).toFixed(2)}</td>
+            <td class="px-4 py-4 whitespace-nowrap text-xs text-gray-500">${o.paymentMethod || '—'}</td>
+            <td class="px-4 py-4 whitespace-nowrap">${getOrderStatusBadge(o.status)}</td>
+            <td class="px-4 py-4 whitespace-nowrap text-xs text-gray-500">${date}</td>
+            <td class="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                <select onchange="updateOrderStatus('${o.id}', this.value)"
+                    class="text-xs border-2 border-gray-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer">
+                    <option value="" disabled selected>Change status</option>
+                    <option value="Processing" ${o.status === 'Processing' ? 'disabled' : ''}>→ Processing</option>
+                    <option value="Paid"       ${o.status === 'Paid'       ? 'disabled' : ''}>→ Paid</option>
+                    <option value="Delivered"  ${o.status === 'Delivered'  ? 'disabled' : ''}>→ Delivered</option>
+                </select>
+            </td>
+        </tr>`;
+    }).join('');
+
+    if (countEl) countEl.textContent = `Showing ${list.length} of ${orders.length} order${orders.length !== 1 ? 's' : ''}`;
+}
+
+window.filterOrders = function() {
+    const statusFilter = document.getElementById('order-status-filter')?.value || '';
+    const searchQ = (document.getElementById('order-search')?.value || '').trim().toLowerCase();
+
+    const filtered = orders.filter(o => {
+        const matchStatus = !statusFilter || o.status === statusFilter;
+        const matchSearch = !searchQ ||
+            (o.name || '').toLowerCase().includes(searchQ) ||
+            (o.userEmail || '').toLowerCase().includes(searchQ) ||
+            (o.id || '').toLowerCase().includes(searchQ);
+        return matchStatus && matchSearch;
+    });
+
+    renderOrders(filtered);
+};
+
+window.updateOrderStatus = async function(orderId, newStatus) {
+    if (!newStatus) return;
+    try {
+        const orderDocRef = doc(db, "orders", orderId);
+        await updateDoc(orderDocRef, { status: newStatus });
+        addActivity(`Order ${orderId.slice(0, 8)}… → ${newStatus}`, '📋', newStatus === 'Paid' ? 'green' : newStatus === 'Delivered' ? 'blue' : 'yellow');
+    } catch (error) {
+        alert(`Error updating order status: ${error.message}`);
+    }
+};
+
 // ==================== INIT ====================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -515,9 +639,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Start real-time listeners for products and users
+        // Start real-time listeners for products, users, and orders
             listenToProducts();
             listenToUsers();
+            listenToOrders();
         } catch (error) {
             console.error("Error checking admin claim:", error);
             alert("Unable to verify admin access right now. Please try again.");

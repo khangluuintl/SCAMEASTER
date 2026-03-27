@@ -277,6 +277,10 @@ function showToast(msg) {
 
 // ── Inject drawer HTML into DOM ────────────────────────────────────────────
 function injectDrawers() {
+    // Resolve checkout path relative to current page location
+    const inCustomerStuff = window.location.pathname.replace(/%20/g, ' ').includes('Customer Stuff');
+    const checkoutPath = inCustomerStuff ? '../checkout.html' : 'checkout.html';
+
     const div = document.createElement('div');
     div.innerHTML = `
     <!-- Overlay -->
@@ -300,7 +304,7 @@ function injectDrawers() {
                 <span id="cart-subtotal" class="text-2xl font-black text-gray-900">$0.00</span>
             </div>
             <p class="text-xs text-gray-400">Shipping & taxes calculated at checkout</p>
-            <button class="w-full py-3.5 bg-gray-900 text-white font-bold rounded-full hover:bg-gray-700 transition-colors text-sm tracking-wide">Proceed to Checkout →</button>
+            <a href="${checkoutPath}" class="block w-full py-3.5 bg-gray-900 text-white font-bold rounded-full hover:bg-gray-700 transition-colors text-sm tracking-wide text-center">Proceed to Checkout →</a>
             <button onclick="window._closeCart()" class="w-full py-2.5 border-2 border-gray-200 text-gray-600 font-bold rounded-full hover:bg-gray-50 transition-colors text-sm">Continue Shopping</button>
         </div>
     </div>
