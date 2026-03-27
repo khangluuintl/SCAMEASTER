@@ -5,7 +5,8 @@ import {
   onAuthStateChanged,
   sendEmailVerification,
   signOut,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  getIdTokenResult
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
 import { doc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 import { auth, db } from "./firebase.js";
@@ -106,7 +107,13 @@ window.login = async (event) => {
       showMessage("Please verify your email before logging in.");
       return;
     }
-    window.location.href = "index.html";
+    // Redirect admins to the admin panel, regular users to homepage
+    const tokenResult = await getIdTokenResult(userCredential.user);
+    if (tokenResult?.claims?.admin) {
+      window.location.href = "Admin Stuff/admin.html";
+    } else {
+      window.location.href = "index.html";
+    }
   } catch (error) {
     showMessage(getAuthErrorMessage(error, "Incorrect email or password."));
   }

@@ -12,6 +12,7 @@ async function main() {
 
   const candidatePaths = [
     path.join(__dirname, "serviceAccountKey.json"),
+    path.join(__dirname, "Admin Stuff", "scameastervn-firebase-adminsdk-fbsvc-b7caee1f7a.json"),
     path.join(__dirname, "Admin Stuff", "scameastervn-firebase-adminsdk-fbsvc-202d93081a.json")
   ];
 
@@ -32,7 +33,8 @@ async function main() {
   try {
     const user = await admin.auth().getUserByEmail(targetEmail);
     await admin.auth().setCustomUserClaims(user.uid, { admin: true });
-    console.log(`Success: ${targetEmail} is now an admin.`);
+    await admin.auth().updateUser(user.uid, { emailVerified: true });
+    console.log(`Success: ${targetEmail} is now an admin with verified email.`);
   } catch (error) {
     console.error("Failed to set admin claim:", error.message);
     process.exit(1);

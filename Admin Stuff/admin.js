@@ -143,6 +143,7 @@ window.handleAddProduct = async function(e) {
     const stock = parseInt(document.getElementById('product-stock').value);
     const description = document.getElementById('product-description').value.trim();
     const image = document.getElementById('product-image').value.trim();
+    const dealType = document.getElementById('product-deal-type').value;
 
     if (!name || !category || isNaN(price) || isNaN(stock)) {
         showAddMessage('Please fill in all required fields.', true);
@@ -161,6 +162,7 @@ window.handleAddProduct = async function(e) {
             stock,
             description,
             image: image || '',
+            dealType: dealType || '',
             status: getStockStatus(stock),
             createdAt: serverTimestamp()
         });
@@ -250,6 +252,7 @@ window.openEditModal = function(id) {
     document.getElementById('edit-product-stock').value = product.stock;
     document.getElementById('edit-product-description').value = product.description || '';
     document.getElementById('edit-product-image').value = product.image || '';
+    document.getElementById('edit-product-deal-type').value = product.dealType || '';
 
     document.getElementById('edit-modal').classList.remove('hidden');
 };
@@ -268,6 +271,7 @@ window.handleEditProduct = async function(e) {
     const stock = parseInt(document.getElementById('edit-product-stock').value);
     const description = document.getElementById('edit-product-description').value.trim();
     const image = document.getElementById('edit-product-image').value.trim();
+    const dealType = document.getElementById('edit-product-deal-type').value;
 
     if (!name || !category || isNaN(price) || isNaN(stock)) {
         alert('Please fill in all required fields.');
@@ -283,6 +287,7 @@ window.handleEditProduct = async function(e) {
             stock,
             description,
             image: image || '',
+            dealType: dealType || '',
             status: getStockStatus(stock)
         });
 
