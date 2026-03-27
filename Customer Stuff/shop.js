@@ -1,6 +1,3 @@
-// shop.js — Shared Cart & Wishlist module for SCAMEASTER
-// Import this in every customer page: import { initShop } from "./shop.js";
-
 const CART_KEY = 'scameaster_cart';
 const WISH_KEY = 'scameaster_wishlist';
 
