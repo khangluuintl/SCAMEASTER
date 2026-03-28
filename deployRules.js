@@ -8,7 +8,7 @@ const https = require("https");
 
 // Initialize Firebase Admin with service account
 const serviceAccount = JSON.parse(
-  readFileSync("./Admin Stuff/serviceAccountKey.json", "utf8")
+  readFileSync("Admin Stuff/serviceAccountKey.json", "utf8")
 );
 
 admin.initializeApp({

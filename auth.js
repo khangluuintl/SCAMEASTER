@@ -196,7 +196,12 @@ onAuthStateChanged(auth, (user) => {
 
   // Redirect authenticated users away from auth pages
   if (user && (currentPage === "login.html" || currentPage === "signup.html")) {
-    window.location.href = "index.html";
+    getIdTokenResult(user).then(tokenResult => {
+      const isAdmin = !!tokenResult?.claims?.admin;
+      window.location.href = isAdmin ? "Admin Stuff/admin.html" : "index.html";
+    }).catch(() => {
+      window.location.href = "index.html";
+    });
   }
 });
 

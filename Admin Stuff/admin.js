@@ -10,8 +10,21 @@ import {
     orderBy,
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
-import { onAuthStateChanged, getIdTokenResult } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+import { onAuthStateChanged, getIdTokenResult, signOut } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
 import { auth, db } from "../firebase.js";
+// ==================== LOGOUT ====================
+
+window.handleLogout = async function() {
+    try {
+        localStorage.removeItem("scameaster_login_time");
+        await signOut(auth);
+        window.location.href = "../login.html";
+    } catch (error) {
+        console.error("Logout error:", error);
+        alert("Failed to log out. Please try again.");
+    }
+};
+
 const productsRef = collection(db, "products");
 const usersRef = collection(db, "users");
 const ordersRef = collection(db, "orders");
@@ -627,10 +640,16 @@ document.addEventListener('DOMContentLoaded', () => {
             let tokenResult = await getIdTokenResult(user);
             let isAdmin = !!tokenResult?.claims?.admin;
 
+            console.log("Admin.js - Token claims (cached):", tokenResult?.claims);
+            console.log("Admin.js - isAdmin (cached):", isAdmin);
+
             // If claim is missing, force refresh once to pick up recent changes.
             if (!isAdmin) {
+                console.log("Admin.js - Forcing token refresh...");
                 tokenResult = await getIdTokenResult(user, true);
                 isAdmin = !!tokenResult?.claims?.admin;
+                console.log("Admin.js - Token claims (refreshed):", tokenResult?.claims);
+                console.log("Admin.js - isAdmin (refreshed):", isAdmin);
             }
 
             if (!isAdmin) {

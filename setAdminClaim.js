@@ -1,6 +1,5 @@
 const admin = require("firebase-admin");
-const fs = require("fs");
-const path = require("path");
+const path = require("Admin Stuff/serviceAccountKey.json");
 
 async function main() {
   const targetEmail = process.argv[2];
