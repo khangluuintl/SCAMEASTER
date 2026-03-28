@@ -11,9 +11,7 @@ async function main() {
   }
 
   const candidatePaths = [
-    path.join(__dirname, "serviceAccountKey.json"),
-    path.join(__dirname, "Admin Stuff", "scameastervn-firebase-adminsdk-fbsvc-b7caee1f7a.json"),
-    path.join(__dirname, "Admin Stuff", "scameastervn-firebase-adminsdk-fbsvc-202d93081a.json")
+    path.join(__dirname, "Admin Stuff", "serviceAccountKey.json"),
   ];
 
   const serviceAccountPath = candidatePaths.find((p) => fs.existsSync(p));
