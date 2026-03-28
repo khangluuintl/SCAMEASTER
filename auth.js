@@ -131,10 +131,28 @@ window.login = async (event) => {
     }
 
     // Redirect admins to the admin panel, regular users to homepage
-    const tokenResult = await getIdTokenResult(userCredential.user);
-    if (tokenResult?.claims?.admin) {
+    let tokenResult = await getIdTokenResult(userCredential.user);
+    let isAdmin = !!tokenResult?.claims?.admin;
+
+    console.log("Token claims:", tokenResult?.claims);
+    console.log("Is admin (cached):", isAdmin);
+
+    // If claim is missing, force refresh once to pick up recent changes.
+    if (!isAdmin) {
+      console.log("Admin claim not found, forcing token refresh...");
+      tokenResult = await getIdTokenResult(userCredential.user, true);
+      isAdmin = !!tokenResult?.claims?.admin;
+      console.log("Token claims after refresh:", tokenResult?.claims);
+      console.log("Is admin (refreshed):", isAdmin);
+    }
+
+    if (isAdmin) {
+      console.log("User is admin, redirecting to admin panel");
+      alert("Debug: isAdmin is TRUE, redirecting to admin.html");
       window.location.href = "Admin Stuff/admin.html";
     } else {
+      console.log("User is not admin, redirecting to index");
+      alert("Debug: isAdmin is FALSE, redirecting to index.html");
       window.location.href = "index.html";
     }
   } catch (error) {
